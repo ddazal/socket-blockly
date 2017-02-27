@@ -7,3 +7,11 @@ var workspaceData = {
 }
 
 var workspace = Blockly.inject('blocklyDiv', workspaceData)
+
+workspace.addChangeListener(updateFunction)
+
+function updateFunction (e) {
+	var xml = Blockly.Xml.workspaceToDom(workspace)
+	var xmlText = Blockly.Xml.domToText(xml)
+	console.log(xmlText)
+}
