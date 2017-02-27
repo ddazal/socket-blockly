@@ -16,4 +16,5 @@ function updateFunction (e) {
 	var xml = Blockly.Xml.workspaceToDom(workspace)
 	var xmlText = Blockly.Xml.domToText(xml)
 	console.log(xmlText)
+	socket.emit('xml blocks', xmlText)
 }

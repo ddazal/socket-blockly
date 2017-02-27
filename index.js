@@ -10,6 +10,10 @@ var io = socketio(server)
 
 io.on('connection', (socket) => {
 	console.log(`User ${socket.id} connected`)
+
+	socket.on('xml blocks', function (xml) {
+		console.log(xml)
+	})
 })
 
 app.use(express.static(__dirname + '/public'))
