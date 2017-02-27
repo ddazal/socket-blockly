@@ -20,5 +20,19 @@ function updateFunction (e) {
 }
 
 socket.on('s2c xml', function (xml) {
-	console.log('Incoming: ' + xml)
+	setTimeout(function () {
+		console.log('Hola mundillo')
+		workspace.dispose()
+		workspace = Blockly.inject('blocklyDiv', workspaceData)
+		var text2dom = Blockly.Xml.textToDom(xml)
+		Blockly.Xml.domToWorkspace(text2dom, workspace)
+	}, 0)
 })
+
+// function refresh (xml) {
+// 	console.log('Hola mundillo')
+// 	workspace.dispose()
+// 	workspace = Blockly.inject('blocklyDiv', workspaceData)
+// 	var tex2dom = Blockly.Xml.textToDom(xml)
+// 	Blockly.Xml.domToWorkspace(text2dom, workspace)
+// }
