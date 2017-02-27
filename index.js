@@ -8,14 +8,14 @@ const port = process.env.PORT || 3000
 
 var io = socketio(server)
 
+app.use(express.static(__dirname + '/public'))
+
 io.on('connection', (socket) => {
 	console.log(`User ${socket.id} connected`)
 
-	socket.on('xml blocks', function (xml) {
-		console.log(xml)
-	})
-})
+	socket.on('c2s xml', (xml) => socket.broadcast.emit('s2c xml', xml))
 
-app.use(express.static(__dirname + '/public'))
+	socket.on('disconnect', () => console.log(`User ${socket.id} disconnected`))
+})
 
 server.listen(port, () => console.log(`http://localhost:${port}/`))

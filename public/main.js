@@ -16,5 +16,9 @@ function updateFunction (e) {
 	var xml = Blockly.Xml.workspaceToDom(workspace)
 	var xmlText = Blockly.Xml.domToText(xml)
 	console.log(xmlText)
-	socket.emit('xml blocks', xmlText)
+	socket.emit('c2s xml', xmlText)
 }
+
+socket.on('s2c xml', function (xml) {
+	console.log('Incoming: ' + xml)
+})
