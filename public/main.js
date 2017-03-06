@@ -1,4 +1,5 @@
-var socket = io()
+
+const socket = require('socket.io-client')()
 
 var workspaceData = {
 	grid: {
@@ -13,20 +14,20 @@ var workspace = Blockly.inject('blocklyDiv', workspaceData)
 workspace.addChangeListener(updateFunction)
 
 function updateFunction (e) {
-	var xml = Blockly.Xml.workspaceToDom(workspace)
-	var xmlText = Blockly.Xml.domToText(xml)
-	console.log(xmlText)
-	socket.emit('c2s xml', xmlText)
+  var xml = Blockly.Xml.workspaceToDom(workspace)
+  var xmlText = Blockly.Xml.domToText(xml)
+  console.log(xmlText)
+  socket.emit('c2s xml', xmlText)
 }
 
 socket.on('s2c xml', function (xml) {
-	setTimeout(function () {
-		console.log('Hola mundillo')
-		workspace.dispose()
-		workspace = Blockly.inject('blocklyDiv', workspaceData)
-		var text2dom = Blockly.Xml.textToDom(xml)
-		Blockly.Xml.domToWorkspace(text2dom, workspace)
-	}, 0)
+
+  console.log('Hola mundillo')
+  workspace.dispose()
+  workspace = Blockly.inject('blocklyDiv', workspaceData)
+  var text2dom = Blockly.Xml.textToDom(xml)
+  Blockly.Xml.domToWorkspace(text2dom, workspace)
+
 })
 
 // function refresh (xml) {
