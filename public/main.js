@@ -1,39 +1,57 @@
+const $ = require('jquery')
+const io = require('socket.io-client')
+const socket = io()
 
-const socket = require('socket.io-client')()
+var xml, xmlText;
 
-var workspaceData = {
+/*======================= Inicialización de Blockly =======================*/
+
+var $toolbox = document.getElementById('toolbox')
+
+$toolbox = Blockly.Options.parseToolboxTree($toolbox)
+
+var workspaceOptions = {
 	grid: {
 		spacing: 10
 	},
-	toolbox: document.getElementById('toolbox'),
+	toolbox: $toolbox,
 	trashcan: true
 }
 
-var workspace = Blockly.inject('blocklyDiv', workspaceData)
-
-workspace.addChangeListener(updateFunction)
-
-function updateFunction (e) {
-  var xml = Blockly.Xml.workspaceToDom(workspace)
-  var xmlText = Blockly.Xml.domToText(xml)
-  console.log(xmlText)
-  socket.emit('c2s xml', xmlText)
-}
-
-socket.on('s2c xml', function (xml) {
-
-  console.log('Hola mundillo')
-  workspace.dispose()
-  workspace = Blockly.inject('blocklyDiv', workspaceData)
-  var text2dom = Blockly.Xml.textToDom(xml)
-  Blockly.Xml.domToWorkspace(text2dom, workspace)
-
+socket.on('build workspace', () => {
+	/*
+	 * Emito un evento desde el servidor que al ser escuchado por el cliente
+	 * inyecta el area de trabajo de Blockly. Lo hice así, para que la variable
+	 * workspace no fuera global, sino que solo estuviera definida dentro del
+	 * evento
+	*/
+	var workspace = Blockly.inject('blocklyDiv', workspaceOptions)
 })
 
-// function refresh (xml) {
-// 	console.log('Hola mundillo')
-// 	workspace.dispose()
-// 	workspace = Blockly.inject('blocklyDiv', workspaceData)
-// 	var tex2dom = Blockly.Xml.textToDom(xml)
-// 	Blockly.Xml.domToWorkspace(text2dom, workspace)
-// }
+/*=========================================================================*/
+
+$('button').click(function () {
+	/* 
+	 * Al principio, con este botón solo emitía el evento al servidor, pero
+	 * no sé porque se pierde la referencia del xml si se dejan la tres primeras
+	 * líneas de código como parte del evento addChangeListener que viene con 
+	 * Blockly...el mismo que usamos paa generar el código en C en pickly.
+	 * Metiendo toda esa lógica aquí, se asegura que el evento se emita con el
+	 * xml actualizado
+	*/
+	var thisWorkspace = Blockly.getMainWorkspace()
+	xml = Blockly.Xml.workspaceToDom(thisWorkspace)
+  xmlText = Blockly.Xml.domToText(xml)
+	socket.emit('new xml', { xml: xmlText })
+})
+
+socket.on('rebuild workspace', function (data) {
+	/*
+	 * La reconstrucción de toda la vida
+	*/
+	var thisWorkspace = Blockly.getMainWorkspace()
+	thisWorkspace.dispose()
+	thisWorkspace = Blockly.inject('blocklyDiv', workspaceOptions)
+	var xmlData = Blockly.Xml.textToDom(data.xml)
+	Blockly.Xml.domToWorkspace(xmlData, thisWorkspace)
+})

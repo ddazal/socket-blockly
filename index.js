@@ -13,8 +13,10 @@ app.use(express.static(__dirname + '/public'))
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} connected`)
 
-  socket.on('c2s xml', function (xml) {
-    socket.broadcast.emit('s2c xml', xml)
+  socket.emit('build workspace')
+
+  socket.on('new xml', (data) => {
+  	socket.broadcast.emit('rebuild workspace', data)
   })
 
   socket.on('disconnect', () => console.log(`User ${socket.id} disconnected`))
