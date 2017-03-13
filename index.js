@@ -13,10 +13,8 @@ app.use(express.static(__dirname + '/public'))
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} connected`)
 
-  socket.emit('build workspace')
-
-  socket.on('new xml', (data) => {
-  	socket.broadcast.emit('rebuild workspace', data)
+  socket.on('new xml', (xml) => {
+    socket.broadcast.emit('rebuild workspace', xml)
   })
 
   socket.on('disconnect', () => console.log(`User ${socket.id} disconnected`))

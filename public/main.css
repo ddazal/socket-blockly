@@ -17,10 +17,5 @@ body {
 	left: 0;
 	position: absolute;
 	top: 0;
-	width: 85%;
-}
-button {
-	position: absolute;
-	top: 0;
-	right: 0;
+	width: 100%;
 }

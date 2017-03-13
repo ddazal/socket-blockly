@@ -18,40 +18,23 @@ var workspaceOptions = {
 	trashcan: true
 }
 
-socket.on('build workspace', () => {
-	/*
-	 * Emito un evento desde el servidor que al ser escuchado por el cliente
-	 * inyecta el area de trabajo de Blockly. Lo hice así, para que la variable
-	 * workspace no fuera global, sino que solo estuviera definida dentro del
-	 * evento
-	*/
-	var workspace = Blockly.inject('blocklyDiv', workspaceOptions)
-})
+var workspace = Blockly.inject('blocklyDiv', workspaceOptions)
 
-/*=========================================================================*/
+function updateWorkspace (event) {
+  if (event.type == Blockly.Events.UI || event.type == Blockly.Events.CREATE) return
 
-$('button').click(function () {
-	/* 
-	 * Al principio, con este botón solo emitía el evento al servidor, pero
-	 * no sé porque se pierde la referencia del xml si se dejan la tres primeras
-	 * líneas de código como parte del evento addChangeListener que viene con 
-	 * Blockly...el mismo que usamos paa generar el código en C en pickly.
-	 * Metiendo toda esa lógica aquí, se asegura que el evento se emita con el
-	 * xml actualizado
-	*/
-	var thisWorkspace = Blockly.getMainWorkspace()
-	xml = Blockly.Xml.workspaceToDom(thisWorkspace)
-  xmlText = Blockly.Xml.domToText(xml)
-	socket.emit('new xml', { xml: xmlText })
-})
+  let xml = Blockly.Xml.workspaceToDom(workspace)
+  let xml_text = Blockly.Xml.domToText(xml)
 
-socket.on('rebuild workspace', function (data) {
-	/*
-	 * La reconstrucción de toda la vida
-	*/
-	var thisWorkspace = Blockly.getMainWorkspace()
-	thisWorkspace.dispose()
-	thisWorkspace = Blockly.inject('blocklyDiv', workspaceOptions)
-	var xmlData = Blockly.Xml.textToDom(data.xml)
-	Blockly.Xml.domToWorkspace(xmlData, thisWorkspace)
+  socket.emit('new xml', xml_text)
+}
+
+workspace.addChangeListener(updateWorkspace)
+
+socket.on('rebuild workspace', function (xml) {
+	Blockly.Events.disable()
+	workspace.clear()
+	var xmlData = Blockly.Xml.textToDom(xml)
+	Blockly.Xml.domToWorkspace(xmlData, workspace)
+	Blockly.Events.enable()
 })
